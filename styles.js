@@ -4,12 +4,11 @@ export const styles = StyleSheet.create({
   backgroundContainer: {
     flex: 1,
     width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(240, 240, 206, 0.76)',
+    resizeMode: 'cover'
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.53)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -18,8 +17,8 @@ export const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    color: 'rgb(199, 146, 234)',
-    fontSize: 24,
+    color: 'rgb(125, 78, 157)',
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 30,
   },
@@ -28,10 +27,10 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    color: 'rgb(130, 170, 255)',
-    fontSize: 16,
+    color: 'rgba(47, 73, 129, 0.7)',
+    fontSize: 20,
     marginBottom: 5,
-    fontWeight: '500',
+    fontWeight: '700',
   },
   input: {
     height: 50,
@@ -39,7 +38,7 @@ export const styles = StyleSheet.create({
     borderColor: '#cccccc',
     borderRadius: 8,
     paddingHorizontal: 10,
-    fontSize: 16,
+    fontSize: 18,
   },
   pickerContainer: {
     borderWidth: 1,
@@ -54,14 +53,25 @@ export const styles = StyleSheet.create({
     marginTop: -50,
     marginBottom: -10,
   },
-  switchContainer:{
+  switchContainer: {
     width: '100%',
     marginBottom: 30,
   },
   buttonContainer: {
     width: '100%',
     marginTop: 10,
-    marginBottom: 30,
+    marginVertical: 20, // Falls bereits vorhanden
+    alignItems: 'center', // Falls bereits vorhanden
+    
+    // Neues Styling für iOS-ähnlichen Look
+    borderRadius: 10,
+    overflow: 'hidden', // Wichtig für das Abschneiden der Ecken des Buttons
+    shadowColor: '#000',
+    shadowOffset: { width: 5, height: 20 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3, 
+    backgroundColor: 'rgb(47,47,47)'
   },
   qrContainer: {
     alignItems: 'center',
@@ -77,5 +87,5 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     color: '#666666',
-  }
+  },
 });
