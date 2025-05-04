@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { styles } from './styles';
 import { Picker } from '@react-native-picker/picker';
 import QRCode from 'react-native-qrcode-svg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
   const [ssid, setSsid] = useState('');
@@ -19,10 +20,64 @@ export default function App() {
   const [securityType, setSecurityType] = useState('WPA');
   const [isHidden, setIsHidden] = useState(false);
   const [qrValue, setQrValue] = useState('');
+  const [wifiDataList, setWifiDataList] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
-  const generateQRCode = () => {
+  const generateQRCode = async () => {
     const wifiString = `WIFI:S:${ssid};T:${securityType};P:${password};H:${isHidden};;`;
     setQrValue(wifiString);
+  
+    try {
+      const storedData = await AsyncStorage.getItem('wifiDataList');
+      let wifiDataList = storedData ? JSON.parse(storedData) : [];
+  
+      const wifiData = { ssid, password, securityType, isHidden };
+  
+      if (selectedIndex !== null && wifiDataList[selectedIndex]) {
+        // überschreiben
+        wifiDataList[selectedIndex] = wifiData;
+      } else {
+        // neuer Eintrag
+        wifiDataList.push(wifiData);
+      }
+  
+      await AsyncStorage.setItem('wifiDataList', JSON.stringify(wifiDataList));
+      setWifiDataList(wifiDataList);
+    } catch (e) {
+      console.error('Speichern fehlgeschlagen', e);
+    }
+  };
+  
+  const loadWifiData = async () => {
+    try {
+      const storedData = await AsyncStorage.getItem('wifiDataList');
+      if (storedData != null) {
+        const wifiDataList = JSON.parse(storedData);
+        setWifiDataList(wifiDataList);  // Setze alle geladenen Daten
+      }
+    } catch (e) {
+      console.log('Fehler beim Laden', e);
+    }
+  };
+
+  const deleteAllWifiData = async () => {
+    try {
+      await AsyncStorage.removeItem('wifiDataList');
+      setWifiDataList([]);
+    } catch (e) {
+      console.error('Fehler beim Löschen aller Einträge', e);
+    }
+  };
+
+  const deleteWifiDataAtIndex = async (index) => {
+    try {
+      const updatedList = [...wifiDataList];
+      updatedList.splice(index, 1);
+      await AsyncStorage.setItem('wifiDataList', JSON.stringify(updatedList));
+      setWifiDataList(updatedList);
+    } catch (e) {
+      console.error('Fehler beim Löschen des Eintrags', e);
+    }
   };
 
   return (
@@ -83,12 +138,21 @@ export default function App() {
             />
           </View>
 
-          <View style={styles.buttonContainer}>
-            <Button
-              title="QR-Code generieren"
-              onPress={generateQRCode}
-              color="rgb(199, 146, 234)"
-            />
+          <View style={[styles.buttonContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+          <View style={{ flex: 1, marginRight: 5 }}>
+              <Button
+                title="QR-Code generieren"
+                onPress={generateQRCode}
+                color="rgb(199, 146, 234)"
+              />
+            </View>
+            <View style={{ flex: 1, marginLeft: 5 }}>
+              <Button
+                title='Gespeicherte Daten laden'
+                onPress={loadWifiData}
+                color="rgb(199, 146, 234)"
+              />
+            </View>
           </View>
 
           {qrValue ? (
@@ -104,6 +168,26 @@ export default function App() {
               </Text>
             </View>
           ) : null}
+
+          {wifiDataList.length > 0 && (
+            <View style={{ marginVertical: 10 }}>
+              <Button title="Alle Einträge löschen" onPress={deleteAllWifiData} color="rgb(199, 146, 234)" />
+            </View>
+          )}
+
+<View style={styles.dataContainer}>
+  {wifiDataList.map((data, index) => (
+    <View key={index} style={styles.dataItem}>
+      <Text style={styles.dataText}>WLAN-Name: {data.ssid}</Text>
+      <Text style={styles.dataText}>Passwort: {data.password}</Text>
+      <Text style={styles.dataText}>Sicherheitstyp: {data.securityType}</Text>
+      <Text style={styles.dataText}>
+        Ist Versteckt: {data.isHidden ? 'Ja' : 'Nein'}
+      </Text>
+      <Button title="Löschen" onPress={() => deleteWifiDataAtIndex(index)} color="rgb(205, 23, 23)" />
+    </View>
+  ))}
+</View>
         </ScrollView>
       </SafeAreaView>
     </ImageBackground>
